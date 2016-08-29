@@ -199,18 +199,25 @@ RED.editor = (function() {
             }
         }
         if (node.inputPorts) {
-            if (node.inputs < node.inputPorts.length) {
-                while (node.inputs < node.inputPorts.length) {
+            var numInputs = node.inputPorts.length;
+            var hasSelector = node._def.hasSelector || node.hasSelector;
+            var totalPorts = hasSelector ? (numInputs + 1) : numInputs;
+            var maxIndex = hasSelector ? parseInt(node.inputs) + 1 : node.inputs;
+
+            if (node.inputs < numInputs) {
+                while (node.inputs < numInputs) {
                     node.inputPorts.pop();
+                    numInputs--;
                 }
                 RED.nodes.eachLink(function(l) {
-                    if (l.source === node && l.sourcePort >= node.inputs) {
+                    if (l.target === node && l.targetPort >= maxIndex) {
                         removedLinks.push(l);
                     }
                 });
-            } else if (node.inputs > node.inputPorts.length) {
-                while (node.inputs > node.inputPorts.length) {
-                    node.inputPorts.push(node.inputPorts.length);
+            } else if (maxIndex > totalPorts) {
+                while (maxIndex > totalPorts) {
+                    node.inputPorts.push(totalPorts);
+                    totalPorts++;
                 }
             }
         }
